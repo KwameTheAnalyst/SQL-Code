@@ -1,19 +1,38 @@
---Select Data that we are going to be using
+-- In this project we make basic queries with partitions, joins, CTE's, 
+-- temp tables and views to answer questions about the status of COVID
+-- around the world
 
+--Select Data that we are going to be using
+Select *
+From PortfolioProject.dbo.CovidDeaths
+
+Select *
+From PortfolioProject.dbo.CovidVaccinations
+
+-- New cases of deaths
 Select location, date, total_cases, new_cases,
 total_deaths,population
-From CovidDeaths
+From PortfolioProject.dbo.CovidDeaths
 ORDER BY 1, 2
 
---- Looking at Total Cases vs Total Deaths
--- shows the likely of dying if you contract Covid in your country
+--- Total Cases vs Total Deaths
+-- What is the likely of dying if you contract Covid in your country
 
 Select location, date, total_cases, total_deaths, (total_deaths/Nullif(total_cases, 0))*100 as DeathPercentage
 From PortfolioProject.dbo.CovidDeaths
-where location like '%states%'
+where location like '%hana%'
 Order By 1,2
 
--- looking at Total Cases vs Population
+-- Total Cases vs Population
+-- What percentage of population has COVID
+
+Select location, date, total_cases, total_deaths, (total_deaths/Nullif(population, 0))*100 as DeathPercentage
+From PortfolioProject.dbo.CovidDeaths
+where location like '%hana%'
+Order By 1,2
+
+-- Countries with highest infection rate
+-- What percentage of your population has COVID?
 
 Select location, population, max(total_cases) as HighestInfectionCount, max((total_cases/Nullif(population, 0)))*100 as PercentofPopulationInfected
 From PortfolioProject.dbo.CovidDeaths
@@ -30,7 +49,7 @@ where continent is not null
 
 Select location, max(cast(total_deaths as int)) as TotalDeathCount 
 From PortfolioProject.dbo.CovidDeaths
---where location like '%states%'
+where continent is not null
 Group by location
 Order By TotalDeathCount desc
 
@@ -39,7 +58,6 @@ Order By TotalDeathCount desc
 
 Select location, max(cast(total_deaths as int)) as TotalDeathCount 
 From PortfolioProject.dbo.CovidDeaths
---where location like '%states%'
 where continent = ''
 Group by location
 Order By TotalDeathCount desc
@@ -64,17 +82,18 @@ Order By TotalDeathCount desc
 -- Global Numbers
 
 Select SUM(new_cases) as total_cases, Sum(cast(new_deaths as int)) as total_deaths, 
-Sum(cast(new_deaths as int))/SUM(Nullif(new_cases, 0))*100 as DeathPercent 
+Sum(cast(new_deaths as int))/SUM(Nullif(new_cases, 0)) *100 as DeathPercent 
 From PortfolioProject.dbo.CovidDeaths
---where location like '%states%'
 where continent is not null
---Group by date
+Group by date
 Order By 1,2
 
 --- Looking at Total Population vs Vaccination
 
 Select * 
 from PortfolioProject.dbo.CovidVaccinations
+
+-- Apply join on Vaccination and Deaths
 
 Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations,
 	SUM(CONVERT(int,vac.new_vaccinations)) OVER (Partition By dea.location ORDER BY dea.location, 
@@ -88,7 +107,7 @@ order by 2,3
 
 
 --- USE CTE
-
+-- Vaccination Rate
 WITH PopvsVac (continent, location, Date, Population, new_vaccinations, RollingPeopleVaccinated) 
 as
 (
@@ -103,7 +122,7 @@ where dea.continent is not null
 --order by 2,3
 )
 
-select *, (RollingPeopleVaccinated/Nullif(Population,0))*100
+select *, (RollingPeopleVaccinated/Nullif(Population,0))*100 as VaccinationRate
 From PopvsVac
 
 
@@ -149,3 +168,20 @@ Join PortfolioProject.dbo.CovidVaccinations vac
 	and dea.date = vac.date
 where dea.continent is not null
 --order by 2,3
+
+
+Create View ContinentBreakdown as 
+Select location, max(cast(total_deaths as int)) as TotalDeathCount 
+From PortfolioProject.dbo.CovidDeaths
+where continent = ''
+Group by location
+
+Create View RegionalInfectionRate as
+Select location, population, max(total_cases) as HighestInfectionCount, max((total_cases/Nullif(population, 0)))*100 as PercentofPopulationInfected
+From PortfolioProject.dbo.CovidDeaths
+--where location like '%states%'
+Group by location, population
+
+-- Call a view
+select *
+From PortfolioProject.dbo.RegionalInfectionRate
