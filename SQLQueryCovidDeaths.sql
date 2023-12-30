@@ -1,7 +1,9 @@
--- In this project we make basic queries with partitions, joins, CTE's, 
--- temp tables and views to answer questions about the status of COVID
--- around the world
-
+/*
+In this project, we perform calculations to extablish the min, max, use partitions, joins, CTE's, temp tables
+group, order and like to make basic queries about the COVID dataset in SQL. 
+We check new cases, deaths, infection rate of countries, Total Population vs Vaccination rates and more, 
+To conclude, we create views to store for latter visualization
+*/
 --Select Data that we are going to be using
 Select *
 From PortfolioProject.dbo.CovidDeaths
