@@ -1,10 +1,18 @@
 
 --- The Nashville Housing Data Cleansing Project
 
+/* 
+In this project, we perform cleaning exercises on the Nashvile Housing Data:
+
+To ensure accurcy and consistency, we use SPLIT, CAST, SUBSTRING, CASE, 
+PARTITION, CTEs, UPDATE, ALTER to remove duplicate rows, 
+typecasting, split columns, update columns, encode new column
+*/
+
 -- Data Cleaning
 ---------------------------------------------------------
 
--- Clearing Data in the SQL queries
+-- Change datatype to date
 
 
 Select SaleDate, convert(Date, SaleDate)
