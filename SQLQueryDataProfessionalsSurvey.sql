@@ -1,4 +1,6 @@
-
+/*
+This survey was condcuted by Alex and thought on his YouTube channel.
+*/
 ------------------CLEANING SEGMENT---------------------------------
 
 Select *
